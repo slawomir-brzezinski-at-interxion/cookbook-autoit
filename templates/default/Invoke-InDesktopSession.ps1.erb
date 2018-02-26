@@ -260,7 +260,7 @@ Function Invoke-InDesktopSession {
 
 	try{
 		$fileName = $psexecPath
-		$arguments = "-accepteula -i $sessionIdForUser $command"
+		$arguments = "-accepteula -s -i $sessionIdForUser $command"
 		$timeOut = [System.TimeSpan]::FromMinutes(20)
 	
 		Invoke-Process -FileName $fileName -Arguments $arguments -Timeout $timeOut
