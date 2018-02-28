@@ -233,18 +233,19 @@ Function Invoke-InDesktopSession {
             )
     
     $domain = ""
+	$extractedUsername = $username
     if ($username -match "\\") {
         $domain = $username.split('\\')[0]
-        $username = $username.split('\\')[1]
+        $extractedUsername = $username.split('\\')[1]
     }
 
     if ($username -match "@") {
         $domain = $username.split('@')[1]
-        $username = $username.split('@')[0]
+        $extractedUsername = $username.split('@')[0]
     }
 
     $computer = [System.Net.Dns]::GetHostByName($env:Computer).HostName
-    $existingSessionForUser = Get-ComputerSessions -computer $computer | ?{$_.Username -eq $username}
+    $existingSessionForUser = Get-ComputerSessions -computer $computer | ?{$_.Username -eq $extractedUsername}
 
     if ($existingSessionForUser) {
         $sessionIdForUser = $existingSessionForUser.Id
@@ -254,13 +255,13 @@ Function Invoke-InDesktopSession {
         $sessionIdForUser = $null
         while (!$sessionIdForUser) {
             sleep 1
-            $sessionIdForUser = Get-ComputerSessions -computer $computer | ?{$_.Username -eq $username} | %{$_.Id} 
+            $sessionIdForUser = Get-ComputerSessions -computer $computer | ?{$_.Username -eq $extractedUsername} | %{$_.Id} 
         }
     }
 
 	try{
 		$fileName = $psexecPath
-		$arguments = "-accepteula -s -i $sessionIdForUser $command"
+		$arguments = "-accepteula -i $sessionIdForUser $command"
 		$timeOut = [System.TimeSpan]::FromMinutes(20)
 	
 		Invoke-Process -FileName $fileName -Arguments $arguments -Timeout $timeOut
